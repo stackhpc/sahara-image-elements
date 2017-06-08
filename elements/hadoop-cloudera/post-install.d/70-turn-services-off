@@ -6,11 +6,13 @@ fi
 set -eu
 set -o pipefail
 
-for i in cloudera-scm-agent \
+SERVICES="hadoop-hdfs-datanode \
+hadoop-hdfs-namenode"
+
+if [ -z "${DIB_CDH_HDFS_ONLY:-}" ]; then
+    SERVICES="$SERVICES cloudera-scm-agent \
 cloudera-scm-server \
 cloudera-scm-server-db \
-hadoop-hdfs-datanode \
-hadoop-hdfs-namenode \
 hadoop-hdfs-secondarynamenode \
 hadoop-mapreduce-historyserver \
 hadoop-yarn-nodemanager \
@@ -20,7 +22,18 @@ hive-server2 \
 hive-webhcat-server \
 hue \
 oozie \
-postgresql
+postgresql"
+
+    if [ $DIB_CDH_VERSION != "5.0" ]; then
+        SERVICES="$SERVICES impala-catalog \
+impala-server \
+impala-state-store \
+solr-server \
+spark-history-server"
+    fi
+fi
+
+for i in $SERVICES
 do
     if [ "$DISTRO_NAME" = "ubuntu" ]; then
         update-rc.d -f $i remove
@@ -28,18 +41,3 @@ do
         chkconfig $i off
     fi
 done
-
-if [ $DIB_CDH_VERSION != "5.0" ]; then
-    for i in impala-catalog \
-        impala-server \
-        impala-state-store \
-        solr-server \
-        spark-history-server
-    do
-        if [ "$DISTRO_NAME" = "ubuntu" ]; then
-            update-rc.d -f $i remove
-        else
-            chkconfig $i off
-        fi
-    done
-fi
