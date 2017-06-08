@@ -229,7 +229,7 @@ case "$PLUGIN" in
         ;;
     "spark")
         case "$BASE_IMAGE_OS" in
-            "" | "ubuntu");;
+            "" | "ubuntu" | "centos7");;
             *)
                 echo -e "'$BASE_IMAGE_OS' image type is not supported by '$PLUGIN'.\nAborting"
                 exit 1
@@ -627,10 +627,23 @@ if [ -z "$PLUGIN" -o "$PLUGIN" = "spark" ]; then
     export DIB_CDH_HDFS_ONLY=1
 
     ubuntu_elements_sequence="$JAVA_ELEMENT swift_hadoop spark hadoop-cloudera s3_hadoop"
-    export ubuntu_image_name=${ubuntu_spark_image_name:-"ubuntu_sahara_spark_latest"}
+    centos7_elements_sequence="$ubuntu_elements_sequence selinux-permissive disable-firewall nc"
 
-    # Creating Ubuntu cloud image
-    image_create ubuntu $ubuntu_image_name $ubuntu_elements_sequence
+    if [ -z "$BASE_IMAGE_OS" -o "$BASE_IMAGE_OS" = "ubuntu" ]; then
+        export ubuntu_image_name=${ubuntu_spark_image_name:-"ubuntu_sahara_spark_latest"}
+
+        # Creating Ubuntu cloud image
+        export DIB_RELEASE=${DIB_RELEASE:-trusty}
+        image_create ubuntu $ubuntu_image_name $ubuntu_elements_sequence
+    fi
+
+    if [ -z "$BASE_IMAGE_OS" -o "$BASE_IMAGE_OS" = "centos7" ]; then
+        export centos7_image_name=${centos7_spark_image_name:-"centos7_sahara_spark_latest"}
+
+        # Creating CentOS7 cloud image
+        image_create centos7 $centos7_image_name $centos7_elements_sequence
+    fi
+
     unset DIB_CLOUD_INIT_DATASOURCES
     unset DIB_HDFS_LIB_DIR
     unset DIB_CDH_HDFS_ONLY
