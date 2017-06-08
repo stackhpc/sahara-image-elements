@@ -553,13 +553,8 @@ if [ -z "$PLUGIN" -o "$PLUGIN" = "spark" ]; then
     export plugin_type="spark"
 
     COMMON_ELEMENTS="$JAVA_ELEMENT swift_hadoop spark"
-    if [ "$DIB_SPARK_VERSION" == "1.6.0" ]; then
-        export DIB_CDH_VERSION="5.4"
-        ubuntu_elements_sequence="$COMMON_ELEMENTS hadoop-cloudera"
-    else
-        export DIB_CDH_VERSION=$HADOOP_VERSION
-        ubuntu_elements_sequence="$COMMON_ELEMENTS hadoop-cloudera"
-    fi
+    export DIB_CDH_VERSION=$HADOOP_VERSION
+    ubuntu_elements_sequence="$COMMON_ELEMENTS hadoop-cloudera"
 
     # Tell the cloudera element to install only hdfs
     export DIB_CDH_HDFS_ONLY=1

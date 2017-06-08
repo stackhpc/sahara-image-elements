@@ -21,7 +21,7 @@ if [ -z "${SPARK_DOWNLOAD_URL:-}" ]; then
             5.3)
                 SPARK_HADOOP_DL=hadoop2.4
             ;;
-            5.4)
+            5.4 | 5.5)
                 SPARK_HADOOP_DL=hadoop2.6
             ;;
             CDH4)
