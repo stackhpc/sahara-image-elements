@@ -106,6 +106,17 @@ else
         mv /etc/rc.d/rc.local /etc/rc.d/rc.local.old
     fi
     RC_SCRIPT_DIR="/etc/rc.d"
+
+    # In a systemd environment we need to ensure that this script is run after
+    # cloud-init as cloud-init installs the default user account which is
+    # referenced by the firstboot script.
+    if which systemctl >/dev/null 2>&1 ; then
+        mkdir -p /etc/systemd/system/cloud-init.service.d
+        cat > /etc/systemd/system/cloud-init.service.d/rc-local.conf << EOF
+[Unit]
+Before=rc-local.service
+EOF
+    fi
 fi
 
 install -D -g root -o root -m 0755 $(dirname $0)/firstboot $RC_SCRIPT_DIR/rc.local
