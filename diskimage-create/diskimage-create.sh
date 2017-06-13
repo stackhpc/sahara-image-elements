@@ -21,6 +21,9 @@ DIB_DEFAULT_STORM_VERSION="1.0.1"
 # Bare metal image generation is enabled with the -b flag, it is off by default
 SIE_BAREMETAL="false"
 
+# Extra DIB elements are specified with the -e flag.
+EXTRA_ELEMENTS=""
+
 # Default list of datasource modules for ubuntu. Workaround for bug #1375645
 export CLOUD_INIT_DATASOURCES=${DIB_CLOUD_INIT_DATASOURCES:-"NoCloud, ConfigDrive, OVF, MAAS, Ec2"}
 
@@ -40,6 +43,8 @@ usage() {
     echo "         [-u]"
     echo "         [-j openjdk|oracle-java]"
     echo "         [-x]"
+    echo "         [-b]"
+    echo "         [-e <elements>]"
     echo "         [-h]"
     echo "   '-p' is plugin version (default: all plugins)"
     echo "   '-i' is operating system of the base image (default: all supported by plugin)"
@@ -51,6 +56,7 @@ usage() {
     echo "   '-j' is java distribution (default: openjdk)"
     echo "   '-x' turns on tracing"
     echo "   '-b' generate a bare metal image"
+    echo "   '-e' space-separated list of additional diskimage-builder elements to install"
     echo "   '-h' display this message"
     echo
     echo "You shouldn't specify image type for spark plugin"
@@ -60,7 +66,7 @@ usage() {
     echo
 }
 
-while getopts "p:i:v:dur:s:t:j:xhb" opt; do
+while getopts "p:i:v:dur:s:t:j:xhbe:" opt; do
     case $opt in
         p)
             PLUGIN=$OPTARG
@@ -95,6 +101,9 @@ while getopts "p:i:v:dur:s:t:j:xhb" opt; do
         ;;
         b)
             SIE_BAREMETAL="true"
+        ;;
+        e)
+            EXTRA_ELEMENTS="$OPTARG"
         ;;
         h)
             usage
@@ -445,6 +454,9 @@ image_create() {
             fedora) elements="$elements fedora-mirror" ;;
             centos | centos7) elements="$elements centos-mirror" ;;
         esac
+    fi
+    if [ -n "${EXTRA_ELEMENTS}" ]; then
+        elements="$elements ${EXTRA_ELEMENTS}"
     fi
     # use a custom cloud image for CentOS 6
     case "$distro" in
