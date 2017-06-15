@@ -14,25 +14,38 @@ if [ -z "${SPARK_DOWNLOAD_URL:-}" ]; then
     # Check hadoop version
     # INFO on hadoop versions: http://spark.apache.org/docs/latest/hadoop-third-party-distributions.html
     if [ -z "${SPARK_HADOOP_DL:-}" ]; then
-        case "${DIB_CDH_VERSION:-}" in
-            5.0)
-                SPARK_HADOOP_DL=hadoop2.3
-            ;;
-            5.3)
-                SPARK_HADOOP_DL=hadoop2.4
-            ;;
-            5.4 | 5.5)
-                SPARK_HADOOP_DL=hadoop2.6
-            ;;
-            CDH4)
-                SPARK_HADOOP_DL=cdh4
-            ;;
-            *)
-                echo "WARNING: Cloudera CDH $DIB_CDH_VERSION not supported."
-                echo "WARNING: use the SPARK_DOWNLOAD_URL variable to install a custom Spark version."
-                exit 1
-            ;;
-        esac
+        if [ -z "${DIB_CDH_VERSION:-}" ]; then
+            case "${DIB_HADOOP_VERSION:-}" in
+                2.7.1)
+                    SPARK_HADOOP_DL=hadoop2.7
+                ;;
+                *)
+                    echo "WARNING: Vanilla hadoop $DIB_HADOOP_VERSION not supported."
+                    echo "WARNING: use the SPARK_DOWNLOAD_URL variable to install a custom Spark version."
+                    exit 1
+                ;;
+            esac
+        else
+            case "${DIB_CDH_VERSION:-}" in
+                5.0)
+                    SPARK_HADOOP_DL=hadoop2.3
+                ;;
+                5.3)
+                    SPARK_HADOOP_DL=hadoop2.4
+                ;;
+                5.4 | 5.5)
+                    SPARK_HADOOP_DL=hadoop2.6
+                ;;
+                CDH4)
+                    SPARK_HADOOP_DL=cdh4
+                ;;
+                *)
+                    echo "WARNING: Cloudera CDH $DIB_CDH_VERSION not supported."
+                    echo "WARNING: use the SPARK_DOWNLOAD_URL variable to install a custom Spark version."
+                    exit 1
+                ;;
+            esac
+        fi
     fi
 
     SPARK_DOWNLOAD_URL="http://archive.apache.org/dist/spark/spark-$DIB_SPARK_VERSION/spark-$DIB_SPARK_VERSION-bin-$SPARK_HADOOP_DL.tgz"

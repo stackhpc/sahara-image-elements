@@ -15,7 +15,18 @@ case "$plugin_type" in
         esac
         DIB_HADOOP_SWIFT_JAR_NAME="hadoop-openstack-$hadoop.jar"
         ;;
-    "cloudera" | "spark")
+    "spark")
+        if [ -z "${DIB_CDH_VERSION:-}" ]; then
+            case "$DIB_HADOOP_VERSION" in
+                "2.7.1")
+                    hadoop="2.7.1";;
+            esac
+            DIB_HADOOP_SWIFT_JAR_NAME="hadoop-openstack-${hadoop}.jar"
+        else
+            DIB_HADOOP_SWIFT_JAR_NAME="hadoop-openstack.jar"
+        fi
+        ;;
+    "cloudera")
         case "$DIB_CDH_VERSION" in
             "CDH4")
                 hadoop="2.2.0";;
@@ -26,13 +37,8 @@ case "$plugin_type" in
             "5.4" | "5.5" | "5.7" | "5.9")
                 hadoop="2.6.0";;
         esac
-        case "$plugin_type" in
-            "cloudera")
-                DIB_CDH_MINOR_VERSION=${DIB_CDH_MINOR_VERSION:-$DIB_CDH_VERSION.0}
-                DIB_HADOOP_SWIFT_JAR_NAME="hadoop-openstack-$hadoop-cdh$DIB_CDH_MINOR_VERSION.jar";;
-            "spark")
-                DIB_HADOOP_SWIFT_JAR_NAME="hadoop-openstack.jar";;
-        esac
+        DIB_CDH_MINOR_VERSION=${DIB_CDH_MINOR_VERSION:-$DIB_CDH_VERSION.0}
+        DIB_HADOOP_SWIFT_JAR_NAME="hadoop-openstack-$hadoop-cdh$DIB_CDH_MINOR_VERSION.jar"
         ;;
     "ambari")
         case "$DIB_AMBARI_VERSION" in

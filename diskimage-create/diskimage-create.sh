@@ -215,7 +215,7 @@ case "$PLUGIN" in
                 echo "CDH version 5.5 will be used"
                 HADOOP_VERSION="5.5"
             ;;
-            "5.5");;
+            "2.7.1" | "5.5");;
             *)
                 echo -e "Unknown hadoop version selected.\nAborting"
                 exit 1
@@ -559,18 +559,33 @@ fi
 ##########################
 
 if [ -z "$PLUGIN" -o "$PLUGIN" = "spark" ]; then
-    export DIB_HDFS_LIB_DIR="/usr/lib/hadoop-mapreduce"
+    if [ "$HADOOP_VERSION" = "2.7.1" ]; then
+        # Use vanilla hadoop for HDFS.
+        export HADOOP_V2_7_1_NATIVE_LIBS_DOWNLOAD_URL=${HADOOP_V2_7_1_NATIVE_LIBS_DOWNLOAD_URL:-"http://sahara-files.mirantis.com/hadoop-native-libs-2.7.1.tar.gz"}
+        export DIB_HDFS_LIB_DIR="/opt/hadoop/share/hadoop/tools/lib"
+        export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_7_1:-"2.7.1"}
+        export SPARK_HADOOP_DL=hadoop2.7
+        HDFS_ELEMENT="hadoop"
+
+        # Tell the hadoop element to install only hdfs
+        export DIB_HADOOP_HDFS_ONLY=1
+    else
+        # Use CDH hadoop for HDFS.
+        export DIB_HDFS_LIB_DIR="/usr/lib/hadoop-mapreduce"
+        HDFS_ELEMENT="hadoop-cloudera"
+
+        # Tell the cloudera element to install only hdfs
+        export DIB_CDH_HDFS_ONLY=1
+        export DIB_CDH_VERSION=$HADOOP_VERSION
+    fi
+
     export DIB_CLOUD_INIT_DATASOURCES=$CLOUD_INIT_DATASOURCES
     export DIB_SPARK_VERSION
     export plugin_type="spark"
 
     COMMON_ELEMENTS="$JAVA_ELEMENT swift_hadoop spark"
-    export DIB_CDH_VERSION=$HADOOP_VERSION
-    ubuntu_elements_sequence="$COMMON_ELEMENTS hadoop-cloudera"
+    ubuntu_elements_sequence="$COMMON_ELEMENTS $HDFS_ELEMENT"
     centos7_elements_sequence="$ubuntu_elements_sequence selinux-permissive disable-firewall nc"
-
-    # Tell the cloudera element to install only hdfs
-    export DIB_CDH_HDFS_ONLY=1
 
     if [ -z "$BASE_IMAGE_OS" -o "$BASE_IMAGE_OS" = "ubuntu" ]; then
         export ubuntu_image_name=${ubuntu_spark_image_name:-"ubuntu_sahara_spark_latest"}
@@ -594,6 +609,7 @@ if [ -z "$PLUGIN" -o "$PLUGIN" = "spark" ]; then
     unset DIB_SPARK_VERSION
     unset DIB_HADOOP_VERSION
     unset DIB_RELEASE
+    unset SPARK_HADOOP_DL
     unset plugin_type
 fi
 

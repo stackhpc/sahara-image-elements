@@ -29,8 +29,8 @@ elif [ "${major_v}" == "1" -a "${minor_v}" == "0" ]; then
 fi
 
 if [ "$plugin_type" == "spark" ]; then
-    if [ -z "${SPARK_DOWNLOAD_URL:-}" -a -z "${DIB_CDH_VERSION:-}" ]; then
-        echo -e "Neither DIB_CDH_VERSION nor SPARK_DOWNLOAD_URL are set. Impossible to install Spark.\nAborting"
+    if [ -z "${SPARK_DOWNLOAD_URL:-}" -a -z "${DIB_HADOOP_VERSION}" -a -z "${DIB_CDH_VERSION:-}" ]; then
+        echo -e "None of DIB_CDH_VERSION, DIB_HADOOP_VERSION or SPARK_HADOOP_DL are set. Impossible to install Spark.\nAborting"
         exit 1
     fi
 fi

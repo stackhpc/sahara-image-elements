@@ -63,6 +63,39 @@ EOF
 
     # enable swiftfs
     ln -s ${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-openstack-${DIB_HADOOP_VERSION}.jar ${HADOOP_HOME}/share/hadoop/common/lib/
+
+    if [ "$plugin_type" = spark ]; then
+        # Add hadoop path to sudo PATH.
+        cat << EOF | sudo tee /etc/sudoers.d/90-hadoop
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin/:/opt/hadoop/bin:/opt/hadoop/sbin
+EOF
+
+        # The spark plugin expects Hadoop configuration in /etc/hadoop as is the
+        # case with CDH. Add a symlink so as not to confuse it.
+        ln -s "$HADOOP_HOME/etc/hadoop" /etc/hadoop
+        chown -h hadoop:hadoop /etc/hadoop
+        ln -s /etc/hadoop /etc/hadoop/conf
+        chown -h hadoop:hadoop /etc/hadoop/conf
+
+        # The spark plugin expects systemd units to exist for the namenode
+        # and datanode services.
+        for service in namenode datanode; do
+            cat > /usr/lib/systemd/system/hadoop-hdfs-${service}.service << EOF
+[Unit]
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=True
+User=hdfs
+ExecStartPre=-/usr/bin/install -d -m 0755 -o hdfs -g hdfs /var/run/hadoop-hdfs
+ExecStartPre=-/usr/bin/install -d -m 0755 /var/lock/subsys
+ExecStart=${HADOOP_HOME}/sbin/hadoop-daemon.sh start ${service}
+ExecStop=${HADOOP_HOME}/sbin/hadoop-daemon.sh stop ${service}
+EOF
+        done
+    fi
 }
 
 case "$DISTRO_NAME" in
@@ -83,9 +116,21 @@ case "$DISTRO_NAME" in
         addgroup hadoop
         adduser --ingroup hadoop --disabled-password --gecos GECOS hadoop
         adduser hadoop sudo
+        if [ "$plugin_type" = "spark" ]; then
+            # An hdfs user is required for spark plugin.
+            addgroup hdfs
+            adduser --ingroup hdfs hdfs --disabled-password --gecos GECOS hdfs
+            adduser hdfs hadoop
+        fi
     ;;
     fedora | rhel | rhel7 | centos | centos7 )
         adduser -G adm,wheel hadoop
+        if [ "$plugin_type" = "spark" ]; then
+            # An hdfs user is required for spark plugin. Adapted from CDH
+            # hadoop spec file.
+            groupadd -r hdfs
+            useradd --comment "Hadoop HDFS" --shell /bin/bash -M -r -g hdfs -G hadoop hdfs
+        fi
     ;;
 esac
 
