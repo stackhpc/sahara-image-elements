@@ -35,7 +35,7 @@ usage() {
     echo "Usage: $(basename $0)"
     echo "         [-p vanilla|spark|cloudera|storm|mapr|ambari|plain]"
     echo "         [-i ubuntu|fedora|centos|centos7]"
-    echo "         [-v 2.7.1|5.5|5.7|5.9|2.2.0.0|2.2.1.0]"
+    echo "         [-v 2.7.1|2.7.3|2.8.0|5.5|5.7|5.9|2.2.0.0|2.2.1.0]"
     echo "         [-r 5.1.0|5.2.0]"
     echo "         [-s 1.3.1|1.6.0]"
     echo "         [-t 0.9.2|1.0.1]"
@@ -158,7 +158,7 @@ case "$PLUGIN" in
     "");;
     "vanilla")
         case "$HADOOP_VERSION" in
-            "" | "2.7.1");;
+            "" | "2.7.1" | "2.7.3" | "2.8.0");;
             *)
                 echo -e "Unknown hadoop version selected.\nAborting"
                 exit 1
@@ -483,11 +483,15 @@ image_create() {
 if [ -z "$PLUGIN" -o "$PLUGIN" = "vanilla" ]; then
     export HIVE_VERSION=${HIVE_VERSION:-"0.11.0"}
     export HADOOP_V2_7_1_NATIVE_LIBS_DOWNLOAD_URL=${HADOOP_V2_7_1_NATIVE_LIBS_DOWNLOAD_URL:-"http://sahara-files.mirantis.com/hadoop-native-libs-2.7.1.tar.gz"}
-    export OOZIE_HADOOP_V2_7_1_DOWNLOAD_URL=${OOZIE_HADOOP_V2_7_1_FILE:-"http://sahara-files.mirantis.com/oozie-4.2.0-hadoop-2.7.1.tar.gz"}
+    export HADOOP_V2_7_3_NATIVE_LIBS_DOWNLOAD_URL=${HADOOP_V2_7_3_NATIVE_LIBS_DOWNLOAD_URL:-"http://sahara-files.mirantis.com/hadoop-native-libs-2.7.3.tar.gz"}
+    export HADOOP_V2_8_0_NATIVE_LIBS_DOWNLOAD_URL=${HADOOP_V2_8_0_NATIVE_LIBS_DOWNLOAD_URL:-"http://sahara-files.mirantis.com/hadoop-native-libs-2.8.0.tar.gz"}
+    export OOZIE_HADOOP_V2_7_1_DOWNLOAD_URL=${OOZIE_HADOOP_V2_7_1_DOWNLOAD_URL:-"http://sahara-files.mirantis.com/oozie-4.2.0-hadoop-2.7.1.tar.gz"}
+    export OOZIE_HADOOP_V2_7_3_DOWNLOAD_URL=${OOZIE_HADOOP_V2_7_3_DOWNLOAD_URL:-"http://sahara-files.mirantis.com/oozie-4.2.0-hadoop-2.7.3.tar.gz"}
+    export OOZIE_HADOOP_V2_8_0_DOWNLOAD_URL=${OOZIE_HADOOP_V2_8_0_DOWNLOAD_URL:-"http://sahara-files.mirantis.com/oozie-4.2.0-hadoop-2.8.0.tar.gz"}
     export DIB_HDFS_LIB_DIR="/opt/hadoop/share/hadoop/tools/lib"
     export plugin_type="vanilla"
-    export DIB_SPARK_VERSION=1.6.0
-    export SPARK_HADOOP_DL=hadoop2.6
+    export DIB_SPARK_VERSION=${DIB_SPARK_VERSION:-1.6.0}
+    export SPARK_HADOOP_DL=hadoop2.7
 
     ubuntu_elements_sequence="hadoop oozie mysql hive $JAVA_ELEMENT swift_hadoop spark"
     fedora_elements_sequence="hadoop oozie mysql disable-firewall hive $JAVA_ELEMENT swift_hadoop spark"
@@ -518,6 +522,22 @@ if [ -z "$PLUGIN" -o "$PLUGIN" = "vanilla" ]; then
             image_create ubuntu $ubuntu_image_name $ubuntu_elements_sequence
             unset DIB_RELEASE
         fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.7.3" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_7_3:-"2.7.3"}
+            export ubuntu_image_name=${ubuntu_vanilla_hadoop_2_7_3_image_name:-"ubuntu_sahara_vanilla_hadoop_2_7_3_latest"}
+            export DIB_RELEASE=${DIB_RELEASE:-trusty}
+            image_create ubuntu $ubuntu_image_name $ubuntu_elements_sequence
+            unset DIB_RELEASE
+        fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.8.0" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_8_0:-"2.8.0"}
+            export ubuntu_image_name=${ubuntu_vanilla_hadoop_2_8_0_image_name:-"ubuntu_sahara_vanilla_hadoop_2_8_0_latest"}
+            export DIB_RELEASE=${DIB_RELEASE:-trusty}
+            image_create ubuntu $ubuntu_image_name $ubuntu_elements_sequence
+            unset DIB_RELEASE
+        fi
         unset DIB_CLOUD_INIT_DATASOURCES
     fi
 
@@ -526,6 +546,18 @@ if [ -z "$PLUGIN" -o "$PLUGIN" = "vanilla" ]; then
         if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.7.1" ]; then
             export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_7_1:-"2.7.1"}
             export fedora_image_name=${fedora_vanilla_hadoop_2_7_1_image_name:-"fedora_sahara_vanilla_hadoop_2_7_1_latest$suffix"}
+            image_create fedora $fedora_image_name $fedora_elements_sequence
+        fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.7.3" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_7_3:-"2.7.3"}
+            export fedora_image_name=${fedora_vanilla_hadoop_2_7_3_image_name:-"fedora_sahara_vanilla_hadoop_2_7_3_latest$suffix"}
+            image_create fedora $fedora_image_name $fedora_elements_sequence
+        fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.8.0" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_8_0:-"2.8.0"}
+            export fedora_image_name=${fedora_vanilla_hadoop_2_8_0_image_name:-"fedora_sahara_vanilla_hadoop_2_8_0_latest$suffix"}
             image_create fedora $fedora_image_name $fedora_elements_sequence
         fi
     fi
@@ -537,6 +569,18 @@ if [ -z "$PLUGIN" -o "$PLUGIN" = "vanilla" ]; then
             export centos_image_name=${centos_vanilla_hadoop_2_7_1_image_name:-"centos_sahara_vanilla_hadoop_2_7_1_latest$suffix"}
             image_create centos $centos_image_name $centos_elements_sequence
         fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.7.3" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_7_3:-"2.7.3"}
+            export centos_image_name=${centos_vanilla_hadoop_2_7_3_image_name:-"centos_sahara_vanilla_hadoop_2_7_3_latest$suffix"}
+            image_create centos $centos_image_name $centos_elements_sequence
+        fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.8.0" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_8_0:-"2.8.0"}
+            export centos_image_name=${centos_vanilla_hadoop_2_8_0_image_name:-"centos_sahara_vanilla_hadoop_2_8_0_latest$suffix"}
+            image_create centos $centos_image_name $centos_elements_sequence
+        fi
     fi
 
     # CentOS 7 cloud image
@@ -544,6 +588,18 @@ if [ -z "$PLUGIN" -o "$PLUGIN" = "vanilla" ]; then
         if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.7.1" ]; then
             export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_7_1:-"2.7.1"}
             export centos7_image_name=${centos7_vanilla_hadoop_2_7_1_image_name:-"centos7_sahara_vanilla_hadoop_2_7_1_latest$suffix"}
+            image_create centos7 $centos7_image_name $centos7_elements_sequence
+        fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.7.3" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_7_3:-"2.7.3"}
+            export centos7_image_name=${centos7_vanilla_hadoop_2_7_3_image_name:-"centos7_sahara_vanilla_hadoop_2_7_3_latest$suffix"}
+            image_create centos7 $centos7_image_name $centos7_elements_sequence
+        fi
+
+        if [ -z "$HADOOP_VERSION" -o "$HADOOP_VERSION" = "2.8.0" ]; then
+            export DIB_HADOOP_VERSION=${DIB_HADOOP_VERSION_2_8_0:-"2.8.0"}
+            export centos7_image_name=${centos7_vanilla_hadoop_2_8_0_image_name:-"centos7_sahara_vanilla_hadoop_2_8_0_latest$suffix"}
             image_create centos7 $centos7_image_name $centos7_elements_sequence
         fi
     fi

@@ -4,6 +4,14 @@ hadoop
 
 Installs Java and Hadoop, configures SSH.
 
+Environment Variables
+---------------------
+
+DIB_HADOOP_DOWNLOAD_URL
+  :Required: No
+  :Description: Download URL for the hadoop package tarball.
+  :Example: ``DIB_HADOOP_DOWNLOAD_URL=http://archive.apache.org/dist/hadoop/core/hadoop-2.7.1/hadoop-2.7.1.tar.gz``
+
 HOWTO build Hadoop Native Libs
 ------------------------------
 

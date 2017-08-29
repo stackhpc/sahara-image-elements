@@ -16,7 +16,7 @@ if [ -z "${SPARK_DOWNLOAD_URL:-}" ]; then
     if [ -z "${SPARK_HADOOP_DL:-}" ]; then
         if [ -z "${DIB_CDH_VERSION:-}" ]; then
             case "${DIB_HADOOP_VERSION:-}" in
-                2.7.1)
+                2.7.1 | 2.7.3 | 2.8.0)
                     SPARK_HADOOP_DL=hadoop2.7
                 ;;
                 *)

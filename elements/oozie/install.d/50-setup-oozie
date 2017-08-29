@@ -16,6 +16,18 @@ if [[ "$DIB_HADOOP_VERSION" == "2.7.1" ]]; then
     else
         OOZIE_FILE=$(basename $OOZIE_HADOOP_V2_7_1_DOWNLOAD_URL)
     fi
+elif [[ "$DIB_HADOOP_VERSION" == "2.7.3" ]]; then
+    if [ -z "${OOZIE_HADOOP_V2_7_3_DOWNLOAD_URL:-}" ]; then
+        OOZIE_FILE=$(basename $OOZIE_HADOOP_V2_7_3_FILE)
+    else
+        OOZIE_FILE=$(basename $OOZIE_HADOOP_V2_7_3_DOWNLOAD_URL)
+    fi
+elif [[ "$DIB_HADOOP_VERSION" == "2.8.0" ]]; then
+    if [ -z "${OOZIE_HADOOP_V2_8_0_DOWNLOAD_URL:-}" ]; then
+        OOZIE_FILE=$(basename $OOZIE_HADOOP_V2_8_0_FILE)
+    else
+        OOZIE_FILE=$(basename $OOZIE_HADOOP_V2_8_0_DOWNLOAD_URL)
+    fi
 else
     echo "Unknown Hadoop version selected. Aborting."
     exit 1
