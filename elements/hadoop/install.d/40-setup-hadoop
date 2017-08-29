@@ -54,6 +54,20 @@ function install_hadoop_v2 {
         echo "Not injecting Hadoop native libs"
     fi
 
+    # Is this causing a NULL pointer exception?
+    if false; then
+        # The HiBD Hadoop distribution has a dependency on an old version of
+        # libsasl2, seen when running:
+        # sudo su -lc "hdfs dfsadmin -report" hadoop.
+        mkdir sasl2-libs
+        pushd sasl2-libs
+        wget ftp://195.220.108.108/linux/centos/6.9/os/x86_64/Packages/cyrus-sasl-lib-2.1.23-15.el6_6.2.x86_64.rpm
+        rpm2cpio cyrus-sasl-lib-2.1.23-15.el6_6.2.x86_64.rpm | cpio -imdv
+        find usr/lib64/ | grep '\.so$' | xargs rm
+        rsync -av usr/lib64 /usr
+        popd
+    fi
+
     echo "Pre-configuring Hadoop"
 
     HADOOP_PID_DIR="/var/run/hadoop"
