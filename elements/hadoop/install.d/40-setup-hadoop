@@ -28,6 +28,12 @@ function install_hadoop_v2 {
     HADOOP_HOME="/opt/hadoop"
     mkdir -p "$INSTALL_DIR"
     tar xvf "$tmp_dir/$package" -C "$INSTALL_DIR"
+    tar_dir=$(tar --exclude '*/*' -tzf "$tmp_dir/$package")
+    if [ "$tar_dir" != "hadoop-$DIB_HADOOP_VERSION/" ]; then
+        # NOTE: The HiDB integrated hadoop distribution names the directory in
+        # the tar file differently than upstream Apache hadoop.
+        mv "$INSTALL_DIR/$tar_dir" "$INSTALL_DIR/hadoop-$DIB_HADOOP_VERSION"
+    fi
     ln -s "$INSTALL_DIR/hadoop-$DIB_HADOOP_VERSION" "$HADOOP_HOME"
     chown -R hadoop:hadoop "$INSTALL_DIR/hadoop-$DIB_HADOOP_VERSION"
     chown -R hadoop:hadoop "$HADOOP_HOME"
