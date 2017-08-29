@@ -42,12 +42,17 @@ function install_hadoop_v2 {
     chown -R hadoop:hadoop "$HADOOP_HOME"
     rm -r $tmp_dir
 
-    echo "Inject Hadoop native libs"
-    rm -r "$HADOOP_HOME/lib/native"
-    wget "$hadoop_native_libs_url"
-    native_libs_filename=$(basename "$hadoop_native_libs_url")
-    tar xvf "$native_libs_filename" -C "$HADOOP_HOME/lib"
-    rm "$native_libs_filename"
+    # If specified, inject Hadoop native libraries.
+    if [ -n "$hadoop_native_libs_url" -a "$hadoop_native_libs_url" != "none" ]; then
+        echo "Inject Hadoop native libs"
+        rm -r "$HADOOP_HOME/lib/native"
+        wget "$hadoop_native_libs_url"
+        native_libs_filename=$(basename "$hadoop_native_libs_url")
+        tar xvf "$native_libs_filename" -C "$HADOOP_HOME/lib"
+        rm "$native_libs_filename"
+    else
+        echo "Not injecting Hadoop native libs"
+    fi
 
     echo "Pre-configuring Hadoop"
 
