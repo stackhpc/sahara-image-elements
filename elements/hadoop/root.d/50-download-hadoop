@@ -10,7 +10,7 @@ function download_hadoop_package {
     package=$1
     echo "Hadoop version $DIB_HADOOP_VERSION will be downloaded"
     cached_package="$DIB_IMAGE_CACHE/$package"
-    $TMP_HOOKS_PATH/bin/cache-url "http://archive.apache.org/dist/hadoop/core/hadoop-$DIB_HADOOP_VERSION/$package" $cached_package
+    $TMP_HOOKS_PATH/bin/cache-url ${DIB_HADOOP_DOWNLOAD_URL:-"http://archive.apache.org/dist/hadoop/core/hadoop-$DIB_HADOOP_VERSION/$package"} $cached_package
     sudo install -D -g root -o root -m 0644 $cached_package $tmp_dir
 }
 
