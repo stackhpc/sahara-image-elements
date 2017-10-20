@@ -54,6 +54,9 @@ function install_hadoop_v2 {
         echo "Not injecting Hadoop native libs"
     fi
 
+    # Fake point to old CentOS 6.x location
+    ln -s /usr/lib64/libsasl2.so.3 /usr/lib64/libsasl2.so.2
+
     # Is this causing a NULL pointer exception?
     if false; then
         # The HiBD Hadoop distribution has a dependency on an old version of
