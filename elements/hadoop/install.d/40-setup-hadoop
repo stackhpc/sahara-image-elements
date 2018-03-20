@@ -70,6 +70,7 @@ function install_hadoop_v2 {
     HADOOP_PID_DIR="/var/run/hadoop"
 
     cat >> /etc/profile.d/hadoop.sh <<EOF
+export HADOOP_HOME=$HADOOP_HOME
 export HADOOP_COMMON_HOME=$HADOOP_HOME
 export PATH=\$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 export HADOOP_HDFS_HOME=\$HADOOP_COMMON_HOME
